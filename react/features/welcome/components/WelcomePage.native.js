@@ -9,7 +9,11 @@ import {
     View
 } from 'react-native';
 
+
 import { getName } from '../../app';
+import { getData } from '../../../mock/api';
+import listStyles from '../../base/react/components/native/styles';
+
 
 import { ColorSchemeRegistry } from '../../base/color-scheme';
 import { translate } from '../../base/i18n';
@@ -34,6 +38,8 @@ import {
 } from './AbstractWelcomePage';
 import LocalVideoTrackUnderlay from './LocalVideoTrackUnderlay';
 import styles, { PLACEHOLDER_TEXT_COLOR } from './styles';
+
+
 import VideoSwitch from './VideoSwitch';
 import WelcomePageLists from './WelcomePageLists';
 import WelcomePageSideBar from './WelcomePageSideBar';
@@ -73,7 +79,7 @@ class WelcomePage extends AbstractWelcomePage {
      * @inheritdoc
      * @returns {void}
      */
-    componentDidMount() {
+    async componentDidMount() {
         super.componentDidMount();
 
         this._updateRoomname();
@@ -91,6 +97,10 @@ class WelcomePage extends AbstractWelcomePage {
                     && dispatch(createDesiredLocalTracks(MEDIA_TYPE.VIDEO));
             });
         }
+        
+        const predefinedRooms = await getData();
+        
+        this.setState({ predefinedRooms })
     }
 
     /**
@@ -263,6 +273,37 @@ class WelcomePage extends AbstractWelcomePage {
                         <VideoSwitch />
                     </Header>
                     <SafeAreaView style = { styles.roomContainer } >
+
+                        {!this.state.predefinedRooms ? null : 
+                            <View style = { styles.joinControls }>
+                                <Text style = { [styles.enterRoomText] }>
+                                    Available rooms
+                                </Text>
+
+                                <View  style = { styles.listItemDetails }>
+                                    <Text style={[listStyles.listItemText, listStyles.listItemTitle]}>Classrooms:</Text>
+                                    <View>
+                                        {this.state.predefinedRooms.classes.map(room => 
+                                            <View key={room.title} style = { listStyles.listItem}>
+                                                <Text style={listStyles.listItemText}>{room.title}</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                </View>
+
+                                <View  style = { styles.listItemDetails }>
+                                    <Text style={[listStyles.listItemText, listStyles.listItemTitle]}>Other rooms:</Text>
+                                    <View>
+                                        {this.state.predefinedRooms.rooms.map(room => 
+                                            <View key={room.title} style = { listStyles.listItem}>
+                                                <Text style={listStyles.listItemText}>{room.title}</Text>
+                                            </View>
+                                        )}
+                                    </View>
+                                </View>
+                            </View>
+                        }
+
                         <View style = { styles.joinControls } >
                             <Text style = { styles.enterRoomText }>
                                 { t('welcomepage.roomname') }
